@@ -36,7 +36,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 return;
             }
             int hour = now.get(Calendar.HOUR_OF_DAY);
-            if (!AlarmScheduler.inWindow(hour, Prefs.fromHour(context), Prefs.toHour(context))) {
+            if (!AlarmScheduler.shouldChime(context, hour)) {
+                Log.i(TAG, "excluded hour " + hour);
                 return;
             }
             String key = now.get(Calendar.YEAR) + "-" + now.get(Calendar.DAY_OF_YEAR) + "-" + hour;

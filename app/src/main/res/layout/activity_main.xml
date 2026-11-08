@@ -39,7 +39,6 @@
             android:layout_marginTop="4dp"
             android:gravity="center"
             android:textColor="@color/ink"
-            android:textDirection="ltr"
             android:textSize="18sp" />
 
         <Switch
@@ -68,11 +67,55 @@
             android:max="100"
             android:progress="70" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/volumeInput"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:hint="0-100"
+                android:inputType="number"
+                android:maxLength="3"
+                android:textColor="@color/ink"
+                android:textDirection="ltr"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/volumeApply"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/btn_small"
+                android:backgroundTint="@null"
+                android:minWidth="0dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:text="تطبيق"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="النسبة نسبة عادية من مستوى صوت الهاتف الحالي، وليست من أعلى صوت. يمكنك ضبطها بالشريط أو بالكتابة."
+            android:textColor="@color/muted"
+            android:textSize="13sp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:text="فترة تشغيل الجرس"
+            android:text="أوقات مستبعدة"
             android:textColor="@color/ink"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -81,7 +124,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="يرن مرة واحدة عند رأس كل ساعة داخل هذه الفترة فقط."
+            android:text="يرن عند رأس كل ساعة ما عدا الأوقات التي تضيفها هنا. اختر الساعة ثم اضغط إضافة."
             android:textColor="@color/muted"
             android:textSize="14sp" />
 
@@ -93,16 +136,8 @@
             android:layoutDirection="ltr"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="52dp"
-                android:layout_height="wrap_content"
-                android:text="من"
-                android:textColor="@color/ink"
-                android:textDirection="rtl"
-                android:textSize="18sp" />
-
             <Button
-                android:id="@+id/fromMinus"
+                android:id="@+id/pickMinus"
                 android:layout_width="52dp"
                 android:layout_height="48dp"
                 android:background="@drawable/btn_small"
@@ -110,24 +145,23 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:padding="0dp"
-                android:textAllCaps="false"
                 android:text="-"
+                android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp" />
 
             <TextView
-                android:id="@+id/fromLabel"
+                android:id="@+id/pickHourLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textColor="@color/ink"
-                android:textDirection="ltr"
-                android:textSize="22sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <Button
-                android:id="@+id/fromPlus"
+                android:id="@+id/pickPlus"
                 android:layout_width="52dp"
                 android:layout_height="48dp"
                 android:background="@drawable/btn_small"
@@ -135,74 +169,38 @@
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:padding="0dp"
-                android:textAllCaps="false"
                 android:text="+"
+                android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp" />
         </LinearLayout>
 
-        <LinearLayout
+        <Button
+            android:id="@+id/addExcluded"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:layoutDirection="ltr"
-            android:orientation="horizontal">
+            android:background="@drawable/btn_bg"
+            android:backgroundTint="@null"
+            android:minHeight="48dp"
+            android:text="إضافة كوقت مستبعد"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
-            <TextView
-                android:layout_width="52dp"
-                android:layout_height="wrap_content"
-                android:text="إلى"
-                android:textColor="@color/ink"
-                android:textDirection="rtl"
-                android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/toMinus"
-                android:layout_width="52dp"
-                android:layout_height="48dp"
-                android:background="@drawable/btn_small"
-                android:backgroundTint="@null"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:textAllCaps="false"
-                android:text="-"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp" />
-
-            <TextView
-                android:id="@+id/toLabel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textColor="@color/ink"
-                android:textDirection="ltr"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/toPlus"
-                android:layout_width="52dp"
-                android:layout_height="48dp"
-                android:background="@drawable/btn_small"
-                android:backgroundTint="@null"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:textAllCaps="false"
-                android:text="+"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp" />
-        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/excludedList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:lineSpacingExtra="3dp"
-            android:text="مستوى الشريط هو نسبة من أعلى صوت، وليس مستوى صوت الهاتف. لا يرن في وضع الصامت أو عدم الإزعاج. يعمل والشاشة مغلقة وبعد مسح التطبيق من التطبيقات الأخيرة. اضغط زر الخلفية مرة واحدة بعد التثبيت."
+            android:text="لا يرن في وضع الصامت أو عدم الإزعاج. يعمل والشاشة مغلقة وبعد مسح التطبيق من التطبيقات الأخيرة. اضغط زر الخلفية مرة واحدة بعد التثبيت."
             android:textColor="@color/muted"
             android:textSize="14sp" />
 
@@ -214,8 +212,8 @@
             android:background="@drawable/btn_bg"
             android:backgroundTint="@null"
             android:minHeight="52dp"
-            android:textAllCaps="false"
             android:text="تجربة الصوت"
+            android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -227,8 +225,8 @@
             android:background="@drawable/btn_bg"
             android:backgroundTint="@null"
             android:minHeight="52dp"
-            android:textAllCaps="false"
             android:text="السماح بالعمل في الخلفية"
+            android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
     </LinearLayout>

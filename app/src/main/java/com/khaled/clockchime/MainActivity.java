@@ -2,6 +2,7 @@ package com.khaled.clockchime;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,14 +10,20 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
@@ -32,10 +39,13 @@ public class MainActivity extends Activity {
     private TextView clockText;
     private TextView statusText;
     private TextView volumeLabel;
-    private TextView fromLabel;
-    private TextView toLabel;
+    private TextView pickHourLabel;
     private Switch enableSwitch;
     private SeekBar volumeSeek;
+    private EditText volumeInput;
+    private LinearLayout excludedList;
+    private int pickHour = 22;
+    private boolean syncingVolume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +54,19 @@ public class MainActivity extends Activity {
         clockText = (TextView) findViewById(R.id.clockText);
         statusText = (TextView) findViewById(R.id.statusText);
         volumeLabel = (TextView) findViewById(R.id.volumeLabel);
-        fromLabel = (TextView) findViewById(R.id.fromLabel);
-        toLabel = (TextView) findViewById(R.id.toLabel);
+        pickHourLabel = (TextView) findViewById(R.id.pickHourLabel);
         enableSwitch = (Switch) findViewById(R.id.enableSwitch);
         volumeSeek = (SeekBar) findViewById(R.id.volumeSeek);
+        volumeInput = (EditText) findViewById(R.id.volumeInput);
+        excludedList = (LinearLayout) findViewById(R.id.excludedList);
 
         enableSwitch.setChecked(Prefs.enabled(this));
-        volumeSeek.setProgress(Prefs.volume(this));
-        showHours();
+        int vol = Prefs.volume(this);
+        volumeSeek.setProgress(vol);
+        volumeInput.setText(String.valueOf(vol));
         showVolume();
+        showPickHour();
+        refreshExcludedList();
 
         enableSwitch.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -62,12 +76,12 @@ public class MainActivity extends Activity {
                 render();
             }
         });
+
         volumeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
-                if (!fromUser) return;
-                Prefs.setVolume(MainActivity.this, progress);
-                showVolume();
+                if (!fromUser || syncingVolume) return;
+                applyVolume(progress, true);
             }
 
             @Override
@@ -75,15 +89,43 @@ public class MainActivity extends Activity {
 
             @Override
             public void onStopTrackingTouch(SeekBar bar) {
-                Prefs.setVolume(MainActivity.this, bar.getProgress());
-                showVolume();
+                applyVolume(bar.getProgress(), true);
             }
         });
 
-        bindHour((Button) findViewById(R.id.fromMinus), true, -1);
-        bindHour((Button) findViewById(R.id.fromPlus), true, 1);
-        bindHour((Button) findViewById(R.id.toMinus), false, -1);
-        bindHour((Button) findViewById(R.id.toPlus), false, 1);
+        findViewById(R.id.volumeApply).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                applyVolumeFromInput();
+            }
+        });
+
+        findViewById(R.id.pickMinus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickHour = Prefs.hour(pickHour - 1);
+                showPickHour();
+            }
+        });
+        findViewById(R.id.pickPlus).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickHour = Prefs.hour(pickHour + 1);
+                showPickHour();
+            }
+        });
+        findViewById(R.id.addExcluded).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Prefs.addExcludedHour(MainActivity.this, pickHour);
+                refreshExcludedList();
+                AlarmScheduler.schedule(MainActivity.this);
+                render();
+                Toast.makeText(MainActivity.this,
+                        "تم استبعاد " + Prefs.formatHourAmPm(pickHour),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 
         findViewById(R.id.testButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,25 +141,36 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void bindHour(Button button, final boolean from, final int delta) {
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (from) {
-                    Prefs.setFromHour(MainActivity.this, Prefs.fromHour(MainActivity.this) + delta);
-                } else {
-                    Prefs.setToHour(MainActivity.this, Prefs.toHour(MainActivity.this) + delta);
-                }
-                showHours();
-                AlarmScheduler.schedule(MainActivity.this);
-                render();
-            }
-        });
+    private void applyVolumeFromInput() {
+        String text = volumeInput.getText().toString().trim();
+        if (text.length() == 0) {
+            Toast.makeText(this, "أدخل رقمًا من 0 إلى 100.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            int value = Integer.parseInt(text);
+            applyVolume(value, true);
+        } catch (NumberFormatException ex) {
+            Toast.makeText(this, "أدخل رقمًا صحيحًا من 0 إلى 100.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void applyVolume(int value, boolean updateInput) {
+        value = Prefs.clamp(value);
+        Prefs.setVolume(this, value);
+        syncingVolume = true;
+        volumeSeek.setProgress(value);
+        if (updateInput) {
+            volumeInput.setText(String.valueOf(value));
+            volumeInput.setSelection(volumeInput.getText().length());
+        }
+        syncingVolume = false;
+        showVolume();
     }
 
     private void testChime() {
-        int volume = volumeSeek.getProgress();
-        Prefs.setVolume(this, volume);
+        applyVolumeFromInput();
+        int volume = Prefs.volume(this);
         if (volume <= 0) {
             Toast.makeText(this, "مستوى الصوت صفر.", Toast.LENGTH_SHORT).show();
             return;
@@ -153,16 +206,63 @@ public class MainActivity extends Activity {
     }
 
     private void showVolume() {
-        volumeLabel.setText("مستوى صوت الجرس: " + volumeSeek.getProgress() + "%");
+        volumeLabel.setText("مستوى صوت الجرس: " + Prefs.volume(this) + "%");
     }
 
-    private void showHours() {
-        fromLabel.setText(hourText(Prefs.fromHour(this)));
-        toLabel.setText(hourText(Prefs.toHour(this)));
+    private void showPickHour() {
+        pickHourLabel.setText(Prefs.formatHourAmPm(pickHour));
     }
 
-    private static String hourText(int hour) {
-        return String.format(Locale.US, "%02d:00", hour);
+    private void refreshExcludedList() {
+        excludedList.removeAllViews();
+        List<Integer> hours = Prefs.excludedHoursSorted(this);
+        if (hours.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("لا توجد أوقات مستبعدة. يرن عند كل ساعة.");
+            empty.setTextColor(0xFF4E5A53);
+            empty.setTextSize(14f);
+            empty.setPadding(0, 8, 0, 8);
+            excludedList.addView(empty);
+            return;
+        }
+        for (int i = 0; i < hours.size(); i++) {
+            final int hour = hours.get(i).intValue();
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, 6, 0, 6);
+
+            TextView label = new TextView(this);
+            label.setText(Prefs.formatHourAmPm(hour));
+            label.setTextColor(0xFF1A2420);
+            label.setTextSize(16f);
+            label.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+            Button remove = new Button(this);
+            remove.setText("حذف");
+            remove.setTextColor(Color.WHITE);
+            remove.setTextSize(14f);
+            remove.setBackgroundResource(R.drawable.btn_small);
+            if (Build.VERSION.SDK_INT >= 21) {
+                remove.setBackgroundTintList(null);
+            }
+            LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            remove.setLayoutParams(bp);
+            remove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Prefs.removeExcludedHour(MainActivity.this, hour);
+                    refreshExcludedList();
+                    AlarmScheduler.schedule(MainActivity.this);
+                    render();
+                }
+            });
+
+            row.addView(label);
+            row.addView(remove);
+            excludedList.addView(row);
+        }
     }
 
     private void render() {
@@ -179,13 +279,13 @@ public class MainActivity extends Activity {
         }
         long next = AlarmScheduler.nextTrigger(this);
         if (next < 0L) {
-            statusText.setText("لا توجد ساعة داخل الفترة");
+            statusText.setText("كل الساعات مستبعدة");
             return;
         }
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(next);
-        statusText.setText("الرنة القادمة: " + String.format(
-                Locale.US, "%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)));
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        statusText.setText("الرنة القادمة: " + Prefs.formatHourAmPm(hour));
     }
 
     @Override

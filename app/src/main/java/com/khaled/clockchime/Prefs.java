@@ -3,6 +3,13 @@ package com.khaled.clockchime;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 public final class Prefs {
     private static final String NAME = "chime";
 
@@ -28,20 +35,49 @@ public final class Prefs {
         sp(ctx).edit().putInt("volume", clamp(value)).apply();
     }
 
-    public static int fromHour(Context ctx) {
-        return hour(sp(ctx).getInt("from", 0));
+    /** Hours 0-23 that must not chime. */
+    public static Set<Integer> excludedHours(Context ctx) {
+        Set<String> raw = sp(ctx).getStringSet("excluded", Collections.<String>emptySet());
+        Set<Integer> out = new HashSet<Integer>();
+        if (raw != null) {
+            for (String s : raw) {
+                try {
+                    out.add(hour(Integer.parseInt(s)));
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return out;
     }
 
-    public static void setFromHour(Context ctx, int hour) {
-        sp(ctx).edit().putInt("from", hour(hour)).apply();
+    public static List<Integer> excludedHoursSorted(Context ctx) {
+        List<Integer> list = new ArrayList<Integer>(excludedHours(ctx));
+        Collections.sort(list);
+        return list;
     }
 
-    public static int toHour(Context ctx) {
-        return hour(sp(ctx).getInt("to", 23));
+    public static void addExcludedHour(Context ctx, int hour) {
+        Set<Integer> set = excludedHours(ctx);
+        set.add(hour(hour));
+        saveExcluded(ctx, set);
     }
 
-    public static void setToHour(Context ctx, int hour) {
-        sp(ctx).edit().putInt("to", hour(hour)).apply();
+    public static void removeExcludedHour(Context ctx, int hour) {
+        Set<Integer> set = excludedHours(ctx);
+        set.remove(Integer.valueOf(hour(hour)));
+        saveExcluded(ctx, set);
+    }
+
+    public static boolean isExcluded(Context ctx, int hour) {
+        return excludedHours(ctx).contains(Integer.valueOf(hour(hour)));
+    }
+
+    private static void saveExcluded(Context ctx, Set<Integer> hours) {
+        Set<String> raw = new HashSet<String>();
+        for (Integer h : hours) {
+            raw.add(String.valueOf(hour(h.intValue())));
+        }
+        sp(ctx).edit().putStringSet("excluded", raw).apply();
     }
 
     public static boolean wasPlayed(Context ctx, String key) {
@@ -50,30 +86,6 @@ public final class Prefs {
 
     public static void markPlayed(Context ctx, String key) {
         sp(ctx).edit().putString("last_key", key).commit();
-    }
-
-    public static void markVolumeOverride(Context ctx, int stream, int previous) {
-        sp(ctx).edit()
-                .putBoolean("vol_dirty", true)
-                .putInt("saved_stream", stream)
-                .putInt("saved_vol", previous)
-                .commit();
-    }
-
-    public static boolean volumeDirty(Context ctx) {
-        return sp(ctx).getBoolean("vol_dirty", false);
-    }
-
-    public static int savedStream(Context ctx) {
-        return sp(ctx).getInt("saved_stream", -1);
-    }
-
-    public static int savedVolume(Context ctx) {
-        return sp(ctx).getInt("saved_vol", -1);
-    }
-
-    public static void clearVolumeOverride(Context ctx) {
-        sp(ctx).edit().putBoolean("vol_dirty", false).commit();
     }
 
     public static int clamp(int volume) {
@@ -86,5 +98,14 @@ public final class Prefs {
         int h = value % 24;
         if (h < 0) h += 24;
         return h;
+    }
+
+    /** Example: 14 -> "2:00 مساءً", 0 -> "12:00 صباحًا". */
+    public static String formatHourAmPm(int hour24) {
+        hour24 = hour(hour24);
+        int h12 = hour24 % 12;
+        if (h12 == 0) h12 = 12;
+        String period = hour24 < 12 ? "صباحًا" : "مساءً";
+        return String.format(Locale.US, "%d:00 %s", h12, period);
     }
 }

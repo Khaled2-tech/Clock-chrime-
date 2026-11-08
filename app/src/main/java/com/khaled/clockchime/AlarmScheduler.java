@@ -16,18 +16,11 @@ public final class AlarmScheduler {
 
     private AlarmScheduler() {}
 
-    public static boolean inWindow(int hour, int from, int to) {
-        hour = Prefs.hour(hour);
-        from = Prefs.hour(from);
-        to = Prefs.hour(to);
-        if (from == to) return hour == from;
-        if (from < to) return hour >= from && hour <= to;
-        return hour >= from || hour <= to;
+    public static boolean shouldChime(Context ctx, int hour) {
+        return !Prefs.isExcluded(ctx, hour);
     }
 
     public static long nextTrigger(Context ctx) {
-        int from = Prefs.fromHour(ctx);
-        int to = Prefs.toHour(ctx);
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -36,7 +29,8 @@ public final class AlarmScheduler {
             cal.add(Calendar.HOUR_OF_DAY, 1);
         }
         for (int i = 0; i < 26; i++) {
-            if (inWindow(cal.get(Calendar.HOUR_OF_DAY), from, to)) {
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            if (shouldChime(ctx, hour)) {
                 return cal.getTimeInMillis();
             }
             cal.add(Calendar.HOUR_OF_DAY, 1);
