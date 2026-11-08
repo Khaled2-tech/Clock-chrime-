@@ -1,0 +1,57 @@
+name: Build Clock Chime APK
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK packages
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          mkdir -p "$SDK"
+          SM="$(find "$SDK" -type f -name sdkmanager 2>/dev/null | head -n 1 || true)"
+          if [ -z "$SM" ]; then
+            echo "sdkmanager missing, downloading commandline tools"
+            TMP="$(mktemp -d)"
+            curl -fsSL -o "$TMP/cmdtools.zip" https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            unzip -q "$TMP/cmdtools.zip" -d "$TMP/clt"
+            rm -rf "$SDK/cmdline-tools/latest"
+            mkdir -p "$SDK/cmdline-tools"
+            mv "$TMP/clt/cmdline-tools" "$SDK/cmdline-tools/latest"
+            SM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          chmod +x "$SM"
+          yes | "$SM" --sdk_root="$SDK" --licenses >/dev/null || true
+          "$SM" --sdk_root="$SDK" "platforms;android-34" "build-tools;34.0.0"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClockChime-debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

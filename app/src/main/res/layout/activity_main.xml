@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="جرس الساعة"
+            android:textColor="@color/ink"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/clockText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textColor="@color/accent"
+            android:textDirection="ltr"
+            android:textSize="42sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textColor="@color/ink"
+            android:textDirection="ltr"
+            android:textSize="18sp" />
+
+        <Switch
+            android:id="@+id/enableSwitch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:minHeight="48dp"
+            android:text="تشغيل الجرس"
+            android:textColor="@color/ink"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/volumeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/ink"
+            android:textSize="18sp" />
+
+        <SeekBar
+            android:id="@+id/volumeSeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:max="100"
+            android:progress="70" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="فترة تشغيل الجرس"
+            android:textColor="@color/ink"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="يرن مرة واحدة عند رأس كل ساعة داخل هذه الفترة فقط."
+            android:textColor="@color/muted"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="52dp"
+                android:layout_height="wrap_content"
+                android:text="من"
+                android:textColor="@color/ink"
+                android:textDirection="rtl"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/fromMinus"
+                android:layout_width="52dp"
+                android:layout_height="48dp"
+                android:background="@drawable/btn_small"
+                android:backgroundTint="@null"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:text="-"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/fromLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/ink"
+                android:textDirection="ltr"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/fromPlus"
+                android:layout_width="52dp"
+                android:layout_height="48dp"
+                android:background="@drawable/btn_small"
+                android:backgroundTint="@null"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:text="+"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="52dp"
+                android:layout_height="wrap_content"
+                android:text="إلى"
+                android:textColor="@color/ink"
+                android:textDirection="rtl"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/toMinus"
+                android:layout_width="52dp"
+                android:layout_height="48dp"
+                android:background="@drawable/btn_small"
+                android:backgroundTint="@null"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:text="-"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/toLabel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/ink"
+                android:textDirection="ltr"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/toPlus"
+                android:layout_width="52dp"
+                android:layout_height="48dp"
+                android:background="@drawable/btn_small"
+                android:backgroundTint="@null"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:textAllCaps="false"
+                android:text="+"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:lineSpacingExtra="3dp"
+            android:text="مستوى الشريط هو نسبة من أعلى صوت، وليس مستوى صوت الهاتف. لا يرن في وضع الصامت أو عدم الإزعاج. يعمل والشاشة مغلقة وبعد مسح التطبيق من التطبيقات الأخيرة. اضغط زر الخلفية مرة واحدة بعد التثبيت."
+            android:textColor="@color/muted"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/testButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/btn_bg"
+            android:backgroundTint="@null"
+            android:minHeight="52dp"
+            android:textAllCaps="false"
+            android:text="تجربة الصوت"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/batteryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/btn_bg"
+            android:backgroundTint="@null"
+            android:minHeight="52dp"
+            android:textAllCaps="false"
+            android:text="السماح بالعمل في الخلفية"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+    </LinearLayout>
+</ScrollView>
